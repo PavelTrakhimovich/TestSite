@@ -1,10 +1,16 @@
 from django.http import HttpResponse
 from django.http.response import  HttpResponseNotFound
 from django.shortcuts import redirect, render
+from .models import *
 
+menu = ['About site', 'Feedback', 'Sign in']
 
 def index(request):
-    return HttpResponse("Page MainNews.")
+    posts = News.objects.all()
+    return render(request, 'mainNews/index.html', {'menu': menu, 'posts':posts, 'title': 'Main page'})
+
+def about(request):
+    return render(request, 'mainNews/about.html', {'menu': menu, 'title': 'About site'})
 
 
 def categories(request, name_cat):
