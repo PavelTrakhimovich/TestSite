@@ -1,30 +1,66 @@
 from django.http import HttpResponse
-from django.http.response import  HttpResponseNotFound
+from django.http.response import  HttpResponseNotFound, Http404
 from django.shortcuts import redirect, render
 from .models import *
 
-menu = ['About site', 'Feedback', 'Sign in']
+menu = [{'title':"About site", 'url_name': 'about'},
+        {'title':"Add news", 'url_name': 'add_page'},
+        {'title':"Feedback", 'url_name': 'contact'},
+        {'title':"Sign In", 'url_name': 'login'},
+]
 
 def index(request):
     posts = News.objects.all()
-    return render(request, 'mainNews/index.html', {'menu': menu, 'posts':posts, 'title': 'Main page'})
+    cats = Category.objects.all()
+    context = {
+        'cats': cats,
+        'menu': menu,
+        'posts':posts,
+        'title': 'Main page',
+        'cat_selected': 0,
+    }
+    return render(request, 'mainNews/index.html', context=context)
+
 
 def about(request):
     return render(request, 'mainNews/about.html', {'menu': menu, 'title': 'About site'})
 
 
-def categories(request, name_cat):
-    if request.GET:
-        print(request.Get)
-    return HttpResponse(f"<h1>News categorise.<h1><p>{name_cat}</p>")
+def addpage(request):
+    return HttpResponse("Add page")
+
+
+def contact(request):
+    return HttpResponse("Feedback")
+
+
+def login(request):
+    return HttpResponse("Login")
+
+
+def show_post(request, post_id):
+    return HttpResponse(f"Post {post_id}")
+
+
+def show_category(request, cat_id):
+    posts = News.objects.filter(cat_id=cat_id)
+    cats = Category.objects.all()
+
+
+    if len(posts) == 0:
+        raise Http404()
+
+
+    context = {
+        'cats': cats,
+        'menu': menu,
+        'posts':posts,
+        'title': 'Categories',
+        'cat_selected': cat_id,
+    }
+    return render(request, 'mainNews/index.html', context=context)
 
 
 def pageNotFound(request, exception):
     return HttpResponseNotFound ('<h1>Page not found</h1>')
 
-
-def archive(request, year):
-    if int(year) > 2022:
-        return redirect(f'/archive/2022/', permanent=True)
-    return HttpResponse(f"<h1>Archive for years</h1><p>{year}</p>")
-    
