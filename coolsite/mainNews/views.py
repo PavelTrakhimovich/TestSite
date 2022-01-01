@@ -43,19 +43,18 @@ def show_post(request, post_slug):
     return render(request, 'mainNews/post.html', context=context)
 
 
-def show_category(request, cat_id):
-    posts = News.objects.filter(cat_id=cat_id)
+def show_category(request, cat_slug):
+    posts = News.objects.filter(cat__slug=cat_slug)
 
 
-    if len(posts) == 0:
-        raise Http404()
 
 
     context = {
         'posts':posts,
         'title': 'Categories',
-        'cat_selected': cat_id,
+        'cat_selected': cat_slug,
     }
+
     return render(request, 'mainNews/index.html', context=context)
 
 
