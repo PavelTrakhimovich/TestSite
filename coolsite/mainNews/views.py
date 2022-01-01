@@ -11,9 +11,7 @@ menu = [{'title':"About site", 'url_name': 'about'},
 
 def index(request):
     posts = News.objects.all()
-    cats = Category.objects.all()
     context = {
-        'cats': cats,
         'menu': menu,
         'posts':posts,
         'title': 'Main page',
@@ -44,7 +42,6 @@ def show_post(request, post_id):
 
 def show_category(request, cat_id):
     posts = News.objects.filter(cat_id=cat_id)
-    cats = Category.objects.all()
 
 
     if len(posts) == 0:
@@ -52,7 +49,6 @@ def show_category(request, cat_id):
 
 
     context = {
-        'cats': cats,
         'menu': menu,
         'posts':posts,
         'title': 'Categories',
