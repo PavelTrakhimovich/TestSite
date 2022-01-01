@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.http.response import  HttpResponseNotFound, Http404
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from .models import *
 
 
@@ -16,7 +16,7 @@ def index(request):
 
 
 def about(request):
-    return render(request, 'mainNews/about.html', {'menu': menu, 'title': 'About site'})
+    return render(request, 'mainNews/about.html', {'title': 'About site',})
 
 
 def addpage(request):
@@ -31,8 +31,16 @@ def login(request):
     return HttpResponse("Login")
 
 
-def show_post(request, post_id):
-    return HttpResponse(f"Post {post_id}")
+def show_post(request, post_slug):
+    post = get_object_or_404(News, slug=post_slug)
+    
+    context = {
+        'post':post,
+        'title': post.title,
+        'cat_selected': post.cat_id,
+    }
+
+    return render(request, 'mainNews/post.html', context=context)
 
 
 def show_category(request, cat_id):
