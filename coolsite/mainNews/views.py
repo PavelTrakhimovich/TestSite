@@ -3,16 +3,11 @@ from django.http.response import  HttpResponseNotFound, Http404
 from django.shortcuts import redirect, render
 from .models import *
 
-menu = [{'title':"About site", 'url_name': 'about'},
-        {'title':"Add news", 'url_name': 'add_page'},
-        {'title':"Feedback", 'url_name': 'contact'},
-        {'title':"Sign In", 'url_name': 'login'},
-]
+
 
 def index(request):
     posts = News.objects.all()
     context = {
-        'menu': menu,
         'posts':posts,
         'title': 'Main page',
         'cat_selected': 0,
@@ -49,7 +44,6 @@ def show_category(request, cat_id):
 
 
     context = {
-        'menu': menu,
         'posts':posts,
         'title': 'Categories',
         'cat_selected': cat_id,
