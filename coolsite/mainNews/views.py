@@ -1,35 +1,53 @@
 from django.http import HttpResponse
 from django.http.response import  HttpResponseNotFound, Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic import ListView, CreateView
+from django.views.generic.detail import DetailView
+
 from .models import *
 from .forms import *
 
 
+menu = [{'title':"About site", 'url_name': 'about'},
+        {'title':"Add news", 'url_name': 'add_page'},
+        {'title':"Feedback", 'url_name': 'contact'},
+        {'title':"Sign In", 'url_name': 'login'},
+        ]
 
-def index(request):
-    posts = News.objects.all()
-    context = {
-        'posts':posts,
-        'title': 'Main page',
-        'cat_selected': 0,
-    }
-    return render(request, 'mainNews/index.html', context=context)
+
+class NewsHome(ListView):
+    model = News
+    template_name = 'mainNews/index.html'
+    context_object_name = 'posts'
+
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        context['title'] = 'Main page'
+        context['cat_selected'] = 0
+        return context
+
+
+    def get_queryset(self):
+        return News.objects.filter(is_published=True)
+
 
 
 def about(request):
     return render(request, 'mainNews/about.html', {'title': 'About site',})
 
 
-def addpage(request):
-    if request.method == 'POST':
-        form = AddPageForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-            
-    else:
-        form = AddPageForm()
-    return render (request, 'mainNews/addpage.html', {'form': form, 'title':'Create news'})
+class AddPost(CreateView):
+    form_class = AddPageForm
+    template_name = 'mainNews/addpost.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        context['title'] = 'Create post'
+        return context
+
 
 
 def contact(request):
@@ -40,31 +58,36 @@ def login(request):
     return HttpResponse("Login")
 
 
-def show_post(request, post_slug):
-    post = get_object_or_404(News, slug=post_slug)
-    
-    context = {
-        'post':post,
-        'title': post.title,
-        'cat_selected': post.cat_id,
-    }
+class ShowPost(DetailView):
+    model = News
+    template_name = 'mainNews/post.html'
+    slug_url_kwarg = 'post_slug'
+    context_object_name = 'post'
 
-    return render(request, 'mainNews/post.html', context=context)
-
-
-def show_category(request, cat_slug):
-    posts = News.objects.filter(cat__slug=cat_slug)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        context['title'] = context['post']
+        return context
 
 
 
+class NewsCategory(ListView):
+    model = News
+    template_name = 'mainNews/index.html'
+    context_object_name = 'posts'
+    allow_empty = False
 
-    context = {
-        'posts':posts,
-        'title': 'Categories',
-        'cat_selected': cat_slug,
-    }
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        context['title'] = 'Category - ' + str(context['posts'][0].cat)
+        context['cat_selected'] = context['posts'][0].cat_id
+        return context
 
-    return render(request, 'mainNews/index.html', context=context)
+
+    def get_queryset(self):
+        return News.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True)
 
 
 def pageNotFound(request, exception):
