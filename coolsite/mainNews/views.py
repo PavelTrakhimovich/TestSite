@@ -22,13 +22,10 @@ def about(request):
 
 def addpage(request):
     if request.method == 'POST':
-        form = AddPageForm(request.POST)
+        form = AddPageForm(request.POST, request.FILES)
         if form.is_valid():
-            try:
-                News.objects.create(**form.cleaned_data)
-                return redirect('home')
-            except:
-                form.add_error(None, 'Error add post')
+            form.save()
+            return redirect('home')
             
     else:
         form = AddPageForm()
