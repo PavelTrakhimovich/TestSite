@@ -27,7 +27,7 @@
 			</ul>
 			<div class="clear"></div>
 		</div>
-		
+
 <table class="table-content" border=0 cellpadding="0" cellspacing="0">
 <tr>
 <!-- Sidebar слева -->
@@ -39,7 +39,17 @@
 	<li><a href="{% url 'home' %}">All categories</a></li>
 {% endif %}
 
-{% show_categories 'name' cat_selected %}
+{% for c in cats %}
+{% if c.news__count > 0 %}
+	{% if p.pk == cat_selected %}
+		<li class="selected">{{c.name}}</li>
+	{% else %}
+		<li><a href="{{ c.get_absolute_url  }}">{{c.name}}</a></li>
+	{% endif %}
+{% endif %}
+{% endfor %}
+
+
 		
 	</ul>
 </td>
