@@ -8,7 +8,7 @@ from .models import *
 class AddPageForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['cat'].empty_label = 'Category not chose'
+        self.fields['cat'].empty_label = 'Category is not chosen'
 
     class Meta:
         model = News
