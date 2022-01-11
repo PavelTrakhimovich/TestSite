@@ -6,8 +6,7 @@ from .models import Category
 
 menu = [{'title':"About site", 'url_name': 'about'},
         {'title':"Add news", 'url_name': 'add_page'},
-        {'title':"Feedback", 'url_name': 'contact'},
-        {'title':"Sign In", 'url_name': 'login'},
+        {'title':"Feedback", 'url_name': 'contact'}
         ]
 
 
