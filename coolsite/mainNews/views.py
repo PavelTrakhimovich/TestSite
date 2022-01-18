@@ -1,3 +1,4 @@
+
 from django.contrib.auth import login, logout
 from django.http import HttpResponse
 from django.http.response import HttpResponseNotFound, Http404
@@ -7,6 +8,7 @@ from django.views.generic import ListView, CreateView
 from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.views.generic.edit import FormView
 
 
 from .models import *
@@ -25,7 +27,7 @@ class NewsHome(DataMixin, ListView):
         return dict(list(context.items()) + list(c_def.items()))
 
     def get_queryset(self):
-        return News.objects.filter(is_published=True)
+        return News.objects.filter(is_published=True).select_related('cat')
 
 
 def about(request):
@@ -44,8 +46,20 @@ class AddPost(LoginRequiredMixin, DataMixin, CreateView):
         return dict(list(context.items()) + list(c_def.items()))
 
 
-def contact(request):
-    return HttpResponse("Feedback")
+class ContactFormView(DataMixin, FormView):
+    form_class = ContactForm
+    template_name = 'mainNews/contact.html'
+    success_url = reverse_lazy('home')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Contact')
+        return dict(list(context.items()) + list(c_def.items()))
+
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        return redirect('home')
+
 
 
 
@@ -66,16 +80,18 @@ class NewsCategory(DataMixin, ListView):
     context_object_name = 'posts'
     allow_empty = False
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Category - ' + str(context['posts'][0].cat),
-                                        cat_selected = context['posts'][0].cat_id)
-        return dict(list(context.items()) + list(c_def.items()))
-
     def get_queryset(self):
         return News.objects.filter(
             cat__slug=self.kwargs['cat_slug'],
-            is_published=True)
+            is_published=True).select_related('cat')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c = Category.objects.get(slug=self.kwargs['cat_slug'])
+        c_def = self.get_user_context(title='Category - ' + str(c.name),
+                                        cat_selected = c.pk)
+        return dict(list(context.items()) + list(c_def.items()))
+
 
 
 def pageNotFound(request, exception):
